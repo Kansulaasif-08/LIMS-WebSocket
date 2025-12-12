@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LIMS - Laboratory Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        /* Login Page */
+        #loginPage {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 400px;
+        }
+        
+        h1 { color: #667eea; text-align: center; margin-bottom: 10px; font-size: 2.5em; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }
+        
+        textarea { resize: vertical; min-height: 80px; }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover { opacity: 0.9; }
+        button.secondary { background: #6c757d; }
+        button.success { background: #28a745; }
+        button.danger { background: #dc3545; }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .hint { text-align: center; margin-top: 15px; font-size: 12px; color: #666; }
+        
+        /* Main Page */
+        #mainPage {
+            display: none;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title { font-size: 24px; color: #667eea; font-weight: bold; }
+        .header-user { display: flex; gap: 15px; align-items: center; }
+        
+        nav {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+        
+        nav button {
+            background: transparent;
+            color: #666;
+            border: none;
+            padding: 10px 20px;
+            margin: 0;
+        }
+        
+        nav button.active {
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+        }
+        
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .tab { display: none; }
+        .tab.active { display: block; }
+        
+        .tab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 { color: #666; font-size: 14px; margin-bottom: 10px; }
+        .stat-card .value { color: #667eea; font-size: 2.5em; font-weight: bold; }
+        
+        /* Form */
+        .form-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .form-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        
+        /* Table */
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: normal;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tr:hover { background: #f9f9f9; }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .badge.registered { background: #e3f2fd; color: #1976d2; }
+        .badge.available { background: #e8f5e9; color: #388e3c; }
+        .badge.completed { background: #e8f5e9; color: #388e3c; }
+        
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            animation: slideIn 0.3s ease-in-out;
+        }
+        
+        .notification.success { background: #28a745; }
+        .notification.error { background: #dc3545; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+        
+        .close-btn {
+            background: #dc3545;
+            font-size: 20px;
+            padding: 5px 10px;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage">
+        <div class="login-container">
+            <h1>🔬 LIMS</h1>
+            <p class="subtitle">Laboratory Information Management System</p>
+            
+            <input type="text" id="username" placeholder="Username" value="admin">
+            <input type="password" id="password" placeholder="Password" value="admin123">
+            <button onclick="login()" style="width:100%">Login</button>
+            
+            <div id="status" class="status info">Connecting to server...</div>
+            <div class="hint">Default: admin / admin123</div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="mainPage">
+        <header>
+            <div class="header-title">🔬 LIMS Dashboard</div>
+            <div class="header-user">
+                <span id="userName">User</span>
+                <button class="danger" onclick="logout()">Logout</button>
+            </div>
+        </header>
+        
+        <nav>
+            <button class="active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button onclick="showTab('samples')">🧪 Samples</button>
+            <button onclick="showTab('equipment')">🔧 Equipment</button>
+        </nav>
+        
+        <div class="container">
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="tab active">
+                <h2>Dashboard Overview</h2>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>Total Samples</h3>
+                        <div class="value" id="totalSamples">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pending Samples</h3>
+                        <div class="value" id="pendingSamples">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Completed Samples</h3>
+                        <div class="value" id="completedSamples">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Equipment</h3>
+                        <div class="value" id="totalEquipment">0</div>
+                    </div>
+                </div>
+                
+                <h3>Recent Samples</h3>
+                <div id="recentSamplesTable"></div>
+            </div>
+            
+            <!-- Samples Tab -->
+            <div id="samplesTab" class="tab">
+                <div class="tab-header">
+                    <h2>Sample Management</h2>
+                    <button class="success" onclick="showAddSampleForm()">+ Add New Sample</button>
+                </div>
+                
+                <input type="text" class="search-box" id="searchSamples" placeholder="🔍 Search samples..." onkeyup="filterSamples()">
+                
+                <div id="samplesTable"></div>
+            </div>
+            
+            <!-- Equipment Tab -->
+            <div id="equipmentTab" class="tab">
+                <div class="tab-header">
+                    <h2>Equipment Management</h2>
+                    <button class="success" onclick="showAddEquipmentForm()">+ Add Equipment</button>
+                </div>
+                
+                <div id="equipmentTable"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Sample Form Overlay -->
+    <div id="sampleFormOverlay" class="form-overlay">
+        <div class="form-box">
+            <div class="form-header">
+                <h2>Add New Sample</h2>
+                <button class="close-btn" onclick="hideAddSampleForm()">×</button>
+            </div>
+            
+            <input type="text" id="sampleName" placeholder="Sample Name *" required>
+            
+            <select id="sampleType" required>
+                <option value="">Select Sample Type *</option>
+                <option value="BLOOD">Blood</option>
+                <option value="URINE">Urine</option>
+                <option value="TISSUE">Tissue</option>
+                <option value="SALIVA">Saliva</option>
+                <option value="DNA">DNA</option>
+                <option value="RNA">RNA</option>
+                <option value="PROTEIN">Protein</option>
+                <option value="CHEMICAL">Chemical</option>
+                <option value="OTHER">Other</option>
+            </select>
+            
+            <input type="text" id="patientId" placeholder="Patient ID *" required>
+            
+            <textarea id="sampleDescription" placeholder="Description (optional)"></textarea>
+            
+            <div class="form-actions">
+                <button class="success" onclick="createSample()">Create Sample</button>
+                <button class="secondary" onclick="hideAddSampleForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Equipment Form Overlay -->
+    <div id="equipmentFormOverlay" class="form-overlay">
+        <div class="form-box">
+            <div class="form-header">
+                <h2>Add New Equipment</h2>
+                <button class="close-btn" onclick="hideAddEquipmentForm()">×</button>
+            </div>
+            
+            <input type="text" id="equipmentName" placeholder="Equipment Name *" required>
+            <input type="text" id="equipmentModel" placeholder="Model *" required>
+            <input type="text" id="equipmentManufacturer" placeholder="Manufacturer *" required>
+            <input type="text" id="equipmentSerial" placeholder="Serial Number (optional)">
+            
+            <div class="form-actions">
+                <button class="success" onclick="createEquipment()">Register Equipment</button>
+                <button class="secondary" onclick="hideAddEquipmentForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let currentUser = null;
+        let allSamples = [];
+
+        window.onload = function() {
+            connectWebSocket();
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') login();
+            });
+        };
+
+        function connectWebSocket() {
+            updateStatus('Connecting to server...', 'info');
+            
+            ws = new WebSocket('ws://localhost:8887');
+            
+            ws.onopen = function() {
+                console.log('✓ WebSocket connected');
+                updateStatus('✓ Connected to server', 'success');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                console.log('Received:', data.type);
+                handleMessage(data);
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                updateStatus('✗ Connection error', 'error');
+            };
+            
+            ws.onclose = function() {
+                console.log('WebSocket closed');
+                updateStatus('✗ Disconnected', 'error');
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        function handleMessage(message) {
+            switch(message.type) {
+                case 'connection':
+                    console.log(message.message);
+                    break;
+                case 'loginResponse':
+                    if (message.status === 'success') {
+                        currentUser = message.user;
+                        showDashboard();
+                        loadData();
+                    } else {
+                        updateStatus('✗ Login failed: ' + message.message, 'error');
+                    }
+                    break;
+                case 'dashboardResponse':
+                    updateDashboard(message.dashboard);
+                    break;
+                case 'samplesResponse':
+                case 'samplesUpdate':
+                    allSamples = message.samples || [];
+                    updateSamplesTable(allSamples);
+                    updateRecentSamples(allSamples);
+                    break;
+                case 'equipmentResponse':
+                case 'equipmentUpdate':
+                    updateEquipmentTable(message.equipment);
+                    break;
+                case 'createSampleResponse':
+                    if (message.status === 'success') {
+                        showNotification('✓ Sample created successfully!', 'success');
+                        hideAddSampleForm();
+                    }
+                    break;
+                case 'createEquipmentResponse':
+                    if (message.status === 'success') {
+                        showNotification('✓ Equipment registered successfully!', 'success');
+                        hideAddEquipmentForm();
+                    }
+                    break;
+            }
+        }
+
+        function send(action, data = {}) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ action, data }));
+            }
+        }
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                updateStatus('✗ Please enter credentials', 'error');
+                return;
+            }
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                send('login', { username, password });
+                updateStatus('Logging in...', 'info');
+            } else {
+                updateStatus('✗ Not connected to server', 'error');
+            }
+        }
+
+        function logout() {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'flex';
+            currentUser = null;
+            document.getElementById('password').value = '';
+        }
+
+        function showDashboard() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'block';
+            document.getElementById('userName').textContent = 
+                '👤 ' + currentUser.firstName + ' ' + currentUser.lastName;
+        }
+
+        function loadData() {
+            send('getDashboard');
+            send('getSamples');
+            send('getEquipment');
+        }
+
+        function showTab(tabName) {
+            // Update nav buttons
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Load data
+            if (tabName === 'samples') send('getSamples');
+            if (tabName === 'equipment') send('getEquipment');
+            if (tabName === 'dashboard') send('getDashboard');
+        }
+
+        function updateStatus(message, type) {
+            const status = document.getElementById('status');
+            if (status) {
+                status.textContent = message;
+                status.className = 'status ' + type;
+            }
+        }
+
+        function updateDashboard(data) {
+            document.getElementById('totalSamples').textContent = data.totalSamples || 0;
+            document.getElementById('pendingSamples').textContent = data.pendingSamples || 0;
+            document.getElementById('completedSamples').textContent = data.completedSamples || 0;
+            document.getElementById('totalEquipment').textContent = data.totalEquipment || 0;
+        }
+
+        function updateSamplesTable(samples) {
+            let html = '<table><thead><tr><th>Sample ID</th><th>Barcode</th><th>Name</th><th>Type</th><th>Patient ID</th><th>Status</th></tr></thead><tbody>';
+            
+            if (samples && samples.length > 0) {
+                samples.forEach(function(s) {
+                    html += '<tr>';
+                    html += '<td>' + s.sampleId + '</td>';
+                    html += '<td>' + s.barcode + '</td>';
+                    html += '<td>' + s.name + '</td>';
+                    html += '<td>' + s.type + '</td>';
+                    html += '<td>' + s.patientId + '</td>';
+                    html += '<td><span class="badge ' + s.status.toLowerCase() + '">' + s.status + '</span></td>';
+                    html += '</tr>';
+                });
+            } else {
+                html += '<tr><td colspan="6" style="text-align:center">No samples found</td></tr>';
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('samplesTable').innerHTML = html;
+        }
+
+        function updateRecentSamples(samples) {
+            let html = '<table><thead><tr><th>Sample ID</th><th>Name</th><th>Type</th><th>Patient</th><th>Status</th></tr></thead><tbody>';
+            
+            const recent = samples.slice(0, 5);
+            
+            if (recent && recent.length > 0) {
+                recent.forEach(function(s) {
+                    html += '<tr>';
+                    html += '<td>' + s.sampleId + '</td>';
+                    html += '<td>' + s.name + '</td>';
+                    html += '<td>' + s.type + '</td>';
+                    html += '<td>' + s.patientId + '</td>';
+                    html += '<td><span class="badge ' + s.status.toLowerCase() + '">' + s.status + '</span></td>';
+                    html += '</tr>';
+                });
+            } else {
+                html += '<tr><td colspan="5" style="text-align:center">No samples found</td></tr>';
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('recentSamplesTable').innerHTML = html;
+        }
+
+        function updateEquipmentTable(equipment) {
+            let html = '<table><thead><tr><th>Equipment ID</th><th>Name</th><th>Model</th><th>Manufacturer</th><th>Status</th></tr></thead><tbody>';
+            
+            if (equipment && equipment.length > 0) {
+                equipment.forEach(function(e) {
+                    html += '<tr>';
+                    html += '<td>' + e.equipmentId + '</td>';
+                    html += '<td>' + e.name + '</td>';
+                    html += '<td>' + e.model + '</td>';
+                    html += '<td>' + e.manufacturer + '</td>';
+                    html += '<td><span class="badge ' + e.status.toLowerCase() + '">' + e.status + '</span></td>';
+                    html += '</tr>';
+                });
+            } else {
+                html += '<tr><td colspan="5" style="text-align:center">No equipment found</td></tr>';
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('equipmentTable').innerHTML = html;
+        }
+
+        // Sample Form Functions
+        function showAddSampleForm() {
+            document.getElementById('sampleFormOverlay').style.display = 'flex';
+        }
+
+        function hideAddSampleForm() {
+            document.getElementById('sampleFormOverlay').style.display = 'none';
+            document.getElementById('sampleName').value = '';
+            document.getElementById('sampleType').value = '';
+            document.getElementById('patientId').value = '';
+            document.getElementById('sampleDescription').value = '';
+        }
+
+        function createSample() {
+            const name = document.getElementById('sampleName').value;
+            const type = document.getElementById('sampleType').value;
+            const patientId = document.getElementById('patientId').value;
+            const description = document.getElementById('sampleDescription').value;
+            
+            if (!name || !type || !patientId) {
+                showNotification('✗ Please fill all required fields!', 'error');
+                return;
+            }
+            
+            send('createSample', { name, type, patientId, description });
+        }
+
+        // Equipment Form Functions
+        function showAddEquipmentForm() {
+            document.getElementById('equipmentFormOverlay').style.display = 'flex';
+        }
+
+        function hideAddEquipmentForm() {
+            document.getElementById('equipmentFormOverlay').style.display = 'none';
+            document.getElementById('equipmentName').value = '';
+            document.getElementById('equipmentModel').value = '';
+            document.getElementById('equipmentManufacturer').value = '';
+            document.getElementById('equipmentSerial').value = '';
+        }
+
+        function createEquipment() {
+            const name = document.getElementById('equipmentName').value;
+            const model = document.getElementById('equipmentModel').value;
+            const manufacturer = document.getElementById('equipmentManufacturer').value;
+            const serialNumber = document.getElementById('equipmentSerial').value;
+            
+            if (!name || !model || !manufacturer) {
+                showNotification('✗ Please fill all required fields!', 'error');
+                return;
+            }
+            
+            send('createEquipment', { name, model, manufacturer, serialNumber });
+        }
+
+        // Search Function
+        function filterSamples() {
+            const search = document.getElementById('searchSamples').value.toLowerCase();
+            const filtered = allSamples.filter(s => 
+                s.sampleId.toLowerCase().includes(search) ||
+                s.name.toLowerCase().includes(search) ||
+                s.patientId.toLowerCase().includes(search) ||
+                s.type.toLowerCase().includes(search)
+            );
+            updateSamplesTable(filtered);
+        }
+
+        // Notification Function
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = 'notification ' + type;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
